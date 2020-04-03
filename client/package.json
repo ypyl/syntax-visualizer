@@ -1,0 +1,54 @@
+{
+  "name": "syntax-visualizer-csharp",
+  "description": "client",
+  "publisher": "vscode",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:plaintext"
+  ],
+  "main": "./out/extension",
+  "enableProposedApi": true,
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Example configuration",
+      "properties": {
+        "syntaxVisualizerCSharp.maxNumberOfProblems": {
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "syntaxVisualizerCSharp.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "verbose",
+          "description": "Traces the communication between VSCode and the languageServerExample service."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "update-vscode": "node ./node_modules/vscode/bin/install",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "@types/node": "^13.11.0",
+    "@types/vscode": "1.43.0",
+    "vscode-test": "^1.3.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^6.1.3"
+  }
+}
