@@ -10,11 +10,47 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:plaintext"
+    "onLanguage:csharp"
   ],
   "main": "./out/extension",
   "enableProposedApi": true,
   "contributes": {
+    "commands": [
+      {
+        "command": "syntaxVisualizer.refreshEntry",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "syntaxVisualizer",
+          "title": "Syntax Visualizer CSharp",
+          "icon": "media/dep.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "syntaxVisualizer.refreshEntry",
+          "when": "view == syntax-visualizer",
+          "group": "navigation"
+        }
+      ]
+    },
+    "views": {
+      "syntaxVisualizer": [
+        {
+          "id": "syntax-visualizer",
+          "name": "Syntax Visualizer CSharp"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "Example configuration",

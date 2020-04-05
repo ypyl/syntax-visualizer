@@ -2,28 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "compile",
-      "group": "build",
-      "presentation": {
-        "panel": "dedicated",
-        "reveal": "never"
+      "label": "npm",
+      "windows": {
+        "options": { "cwd": "${workspaceFolder}/client" }
       },
-      "problemMatcher": ["$tsc"]
-    },
-    {
-      "type": "npm",
-      "script": "watch",
-      "isBackground": true,
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "panel": "dedicated",
-        "reveal": "never"
-      },
-      "problemMatcher": ["$tsc-watch"]
+      "command": "npm",
+      "args": ["run", "compile", "--loglevel", "silent"],
+      "type": "shell",
+      "problemMatcher": "$tsc-watch"
     },
     {
       "label": "build",
@@ -31,36 +17,15 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/server/SampleServer.csproj",
+        "${workspaceFolder}/server/SyntaxVisualizer.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "publish",
-      "command": "dotnet",
-      "type": "process",
-      "args": [
-        "publish",
-        "${workspaceFolder}/server/SampleServer.csproj",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
-      ],
-      "problemMatcher": "$msCompile"
-    },
-    {
-      "label": "watch",
-      "command": "dotnet",
-      "type": "process",
-      "args": [
-        "watch",
-        "run",
-        "${workspaceFolder}/server/SampleServer.csproj",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
-      ],
-      "problemMatcher": "$msCompile"
+      "label": "All",
+      "dependsOn": ["npm", "build"]
     }
   ]
 }

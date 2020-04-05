@@ -1,12 +1,15 @@
 'use strict';
 
-import { workspace, Disposable, ExtensionContext } from 'vscode';
+import { workspace, Disposable, ExtensionContext, commands } from 'vscode';
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
 } from 'vscode-languageclient';
 import { Trace } from 'vscode-jsonrpc';
+import { TestView } from './testView';
+
+let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
   let serverExe = 'dotnet';
@@ -27,19 +30,15 @@ export function activate(context: ExtensionContext) {
   };
 
   let clientOptions: LanguageClientOptions = {
-    documentSelector: [
-      {
-        pattern: '**/*.cs',
-      },
-    ],
-    progressOnInitialization: true,
-    synchronize: {
-      configurationSection: 'syntaxVisualizerCSharp',
-      fileEvents: workspace.createFileSystemWatcher('**/*.cs'),
-    },
+    documentSelector: [{ scheme: 'file', language: 'csharp' }],
+    // progressOnInitialization: true,
+    // synchronize: {
+    //   configurationSection: 'syntaxVisualizerCSharp',
+    //   fileEvents: workspace.createFileSystemWatcher('**/*.cs'),
+    // },
   };
 
-  const client = new LanguageClient(
+  client = new LanguageClient(
     'syntaxVisualizerCSharp',
     'Syntax Visualizer C#',
     serverOptions,
@@ -47,7 +46,27 @@ export function activate(context: ExtensionContext) {
   );
   client.registerProposedFeatures();
   client.trace = Trace.Verbose;
-  let disposable = client.start();
+  client.start();
 
-  context.subscriptions.push(disposable);
+  client.onReady().then(() => {
+    new TestView(context, () => {
+      client
+        .sendRequest<any>('syntaxVisualizer/getSyntaxTree', {
+          test: 'value',
+        })
+        .then((x) => {
+          console.log(x);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    });
+  });
+}
+
+export function deactivate(): Thenable<void> | undefined {
+  if (!client) {
+    return undefined;
+  }
+  return client.stop();
 }
