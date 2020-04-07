@@ -13,7 +13,6 @@
     "onLanguage:csharp"
   ],
   "main": "./out/extension",
-  "enableProposedApi": true,
   "contributes": {
     "commands": [
       {

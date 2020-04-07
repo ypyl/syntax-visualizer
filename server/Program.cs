@@ -54,12 +54,12 @@ namespace SyntaxVisualizer
                         .AddLanguageServer()
                         .SetMinimumLevel(LogLevel.Debug))
                     .WithHandler<SyntaxTreeHandler>()
-                    .OnDidSaveTextDocument(async (p, t) =>
+                    .OnDidSaveTextDocument((p, t) =>
                     {
                         //var tree = CSharpSyntaxTree.ParseText(p.Text);
                         //walker.Visit(await tree.GetRootAsync());
                         text = p.Text;
-                        return Unit.Value;
+                        return Unit.Task;
                     },
                     new TextDocumentSaveRegistrationOptions
                     {

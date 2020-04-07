@@ -7,7 +7,7 @@
         "options": { "cwd": "${workspaceFolder}/client" }
       },
       "command": "npm",
-      "args": ["run", "compile", "--loglevel", "silent"],
+      "args": ["run", "compile"],
       "type": "shell",
       "problemMatcher": "$tsc-watch"
     },

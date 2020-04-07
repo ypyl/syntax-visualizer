@@ -21,44 +21,21 @@ namespace SyntaxVisualizer
 
     public class SyntaxTree
     {
-        //public string value;
-
-    }
-    public class SyntaxTreeRegistration
-    {
-
-    }
-
-    public class SyntaxTreeCapability
-    {
-
+        public string value;
     }
 
     [Parallel, Method("syntaxVisualizer/getSyntaxTree")]
-    interface ISyntaxTreeHandler
-        : IJsonRpcHandler,
-            IJsonRpcRequestHandler<SyntaxTreeParams, SyntaxTree>,
-            IRegistration<SyntaxTreeRegistration>,
-            ICapability<SyntaxTreeCapability>
+    interface ISyntaxTreeHandler : IJsonRpcHandler, IJsonRpcRequestHandler<SyntaxTreeParams, SyntaxTree>
     {
 
     }
 
     public class SyntaxTreeHandler : ISyntaxTreeHandler
     {
-        public SyntaxTreeRegistration GetRegistrationOptions()
-        {
-            return new SyntaxTreeRegistration();
-        }
-
         public Task<SyntaxTree> Handle(SyntaxTreeParams request, CancellationToken cancellationToken)
         {
-            Console.Write(request.test);
-            return Task.FromResult(new SyntaxTree { });
-        }
-
-        public void SetCapability(SyntaxTreeCapability capability)
-        {
+            //Console.Write(request.test);
+            return Task.FromResult(new SyntaxTree { value = "myValue" });
         }
     }
 }
