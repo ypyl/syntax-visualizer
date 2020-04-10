@@ -1,13 +1,19 @@
 'use strict';
 
-import { workspace, Disposable, ExtensionContext, commands } from 'vscode';
+import {
+  workspace,
+  Disposable,
+  ExtensionContext,
+  commands,
+  window,
+} from 'vscode';
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
 } from 'vscode-languageclient';
 import { Trace } from 'vscode-jsonrpc';
-import { TestView } from './testView';
+import { SyntaxNodeProvider } from './syntaxNodeView';
 
 let client: LanguageClient;
 
@@ -31,11 +37,11 @@ export function activate(context: ExtensionContext) {
 
   let clientOptions: LanguageClientOptions = {
     documentSelector: [{ scheme: 'file', language: 'csharp' }],
-    // progressOnInitialization: true,
-    // synchronize: {
-    //   configurationSection: 'syntaxVisualizerCSharp',
-    //   fileEvents: workspace.createFileSystemWatcher('**/*.cs'),
-    // },
+    progressOnInitialization: true,
+    synchronize: {
+      configurationSection: 'syntaxVisualizerCSharp',
+      fileEvents: workspace.createFileSystemWatcher('**/*.cs'),
+    },
   };
 
   client = new LanguageClient(
@@ -44,23 +50,28 @@ export function activate(context: ExtensionContext) {
     serverOptions,
     clientOptions
   );
-  client.registerProposedFeatures();
   client.trace = Trace.Verbose;
   client.start();
 
   client.onReady().then(() => {
-    new TestView(context, () => {
-      client
-        .sendRequest<any>('syntaxVisualizer/getSyntaxTree', {
-          test: 'value',
-        })
-        .then((x) => {
-          console.log(x);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+    const getTree = (params: any) =>
+      client.sendRequest<any>('syntaxVisualizer/getSyntaxTree', params);
+    const provider = new SyntaxNodeProvider(getTree);
+
+    client.onRequest('syntaxVisualizer/revealSyntaxNode', (params) => {
+      console.log('client called');
     });
+
+    const tree = window.createTreeView('syntax-visualizer', {
+      treeDataProvider: provider,
+      showCollapseAll: true,
+    });
+    commands.registerCommand('syntaxVisualizer.refreshEntry', () =>
+      provider.refresh()
+    );
+
+    tree.visible;
+    tree.reveal();
   });
 }
 

@@ -10,10 +10,16 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:csharp"
+    "onView:syntax-visualizer"
   ],
   "main": "./out/extension",
   "contributes": {
+    "viewsWelcome": [
+      {
+        "view": "syntax-visualizer",
+        "contents": "No csharp code found. Try to refresh."
+      }
+    ],
     "commands": [
       {
         "command": "syntaxVisualizer.refreshEntry",
