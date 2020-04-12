@@ -40,7 +40,6 @@ export function activate(context: ExtensionContext) {
     progressOnInitialization: true,
     synchronize: {
       configurationSection: 'syntaxVisualizerCSharp',
-      fileEvents: workspace.createFileSystemWatcher('**/*.cs'),
     },
   };
 
@@ -56,22 +55,41 @@ export function activate(context: ExtensionContext) {
   client.onReady().then(() => {
     const getTree = (params: any) =>
       client.sendRequest<any>('syntaxVisualizer/getSyntaxTree', params);
-    const provider = new SyntaxNodeProvider(getTree);
 
-    client.onRequest('syntaxVisualizer/revealSyntaxNode', (params) => {
-      console.log('client called');
-    });
+    const provider = new SyntaxNodeProvider(getTree);
 
     const tree = window.createTreeView('syntax-visualizer', {
       treeDataProvider: provider,
       showCollapseAll: true,
     });
-    commands.registerCommand('syntaxVisualizer.refreshEntry', () =>
-      provider.refresh()
-    );
 
-    tree.visible;
-    tree.reveal();
+    let incorrectTree = false;
+
+    client.onNotification('syntaxVisualizer/invalidTree', () => {
+      tree.message = 'Code was changed - try to refresh.';
+      incorrectTree = true;
+    });
+
+    window.onDidChangeTextEditorSelection(async (ev) => {
+      if (tree.visible && ev.selections.length > 0 && !incorrectTree) {
+        const nodeItems = provider.getNodeItemByPosition(
+          ev.selections[0].start,
+          ev.selections[0].end
+        );
+        for (let i = 0; i < nodeItems.length; i++) {
+          await tree.reveal(nodeItems[i], {
+            select: true,
+            expand: true,
+          });
+        }
+      }
+    });
+
+    commands.registerCommand('syntaxVisualizer.refreshEntry', () => {
+      tree.message = null;
+      incorrectTree = false;
+      provider.refresh();
+    });
   });
 }
 

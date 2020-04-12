@@ -37,8 +37,9 @@ namespace SyntaxVisualizer
                         .AddLanguageServer()
                         .SetMinimumLevel(LogLevel.Debug))
                     .WithHandler(handler)
-                    .WithHandler(new TextDocumentHandler(handler))
-            );
+                    .WithHandler(new TextDocumentHandler(handler)));
+
+            handler.UpdateInvalidateTree(() => server.SendNotification("syntaxVisualizer/invalidTree"));
 
             await server.WaitForExit;
         }

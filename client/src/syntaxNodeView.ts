@@ -2,6 +2,55 @@ import * as vscode from 'vscode';
 
 export class SyntaxNodeProvider
   implements vscode.TreeDataProvider<SyntaxNodeTreeItem> {
+  getNodeItemByPosition(
+    start: vscode.Position,
+    end: vscode.Position
+  ): SyntaxNodeTreeItem[] {
+    return this.searchNodeByPosition(
+      this.fillTree,
+      start.line,
+      start.character,
+      end.line,
+      end.character
+    );
+  }
+
+  private searchNodeByPosition(
+    tree: SyntaxNode,
+    startLine: number,
+    start: number,
+    endLine: number,
+    end: number
+  ): SyntaxNodeTreeItem[] {
+    let result = [];
+    if (tree.nodes) {
+      for (let i = 0; i < tree.nodes.length; i++) {
+        let subNode = tree.nodes[i];
+        if (subNode.startLine <= startLine && subNode.endLine >= endLine) {
+          if (subNode.startLine == startLine && subNode.start > start) {
+            continue;
+          }
+          if (subNode.endLine == endLine && subNode.end < end) {
+            continue;
+          }
+          result.push(subNode.item);
+          const inner = this.searchNodeByPosition(
+            subNode,
+            startLine,
+            start,
+            endLine,
+            end
+          );
+          if (inner) {
+            result = result.concat(inner);
+          }
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
   private _onDidChangeTreeData: vscode.EventEmitter<
     SyntaxNodeTreeItem | undefined
   > = new vscode.EventEmitter<SyntaxNodeTreeItem | undefined>();
@@ -11,7 +60,10 @@ export class SyntaxNodeProvider
 
   constructor(private getTree: (params: any) => Promise<any>) {}
 
+  private fillTree?: SyntaxNode;
+
   refresh(): void {
+    this.fillTree = null;
     this._onDidChangeTreeData.fire();
   }
 
@@ -19,40 +71,106 @@ export class SyntaxNodeProvider
     return element;
   }
 
-  getChildren(element?: SyntaxNodeTreeItem): Thenable<SyntaxNodeTreeItem[]> {
-    if (element) {
-      return this.getTree({ id: element.id }).then((x: SyntaxNode) => {
-        if (x && x.nodes) {
-          return x.nodes.map((n) => this.getNode(n));
+  getParent(
+    element: SyntaxNodeTreeItem
+  ): vscode.ProviderResult<SyntaxNodeTreeItem> {
+    return this.findParent(this.fillTree, element.id);
+  }
+
+  findParent(tree: SyntaxNode, id: string): SyntaxNodeTreeItem {
+    if (tree.nodes.some((x) => x.id === id)) {
+      return tree.item;
+    } else {
+      for (let i = 0; i < tree.nodes.length; i++) {
+        const subResult = this.findParent(tree.nodes[i], id);
+        if (subResult) {
+          return subResult;
         }
-        return null;
+      }
+    }
+  }
+
+  getChildren(
+    element?: SyntaxNodeTreeItem
+  ): vscode.ProviderResult<SyntaxNodeTreeItem[]> {
+    if (this.fillTree == null) {
+      return this.getTree(null).then((x: SyntaxNode) => {
+        if (x.nodes && x.nodes.length == 1) {
+          this.fillTree = x.nodes[0];
+        } else {
+          this.fillTree = x;
+        }
+        this.updateTree(this.fillTree);
+        return this.getNodes(this.fillTree, element);
       });
     } else {
-      return this.getTree(null).then((x: SyntaxNode) => {
-        if (x && x.nodes) {
-          return x.nodes.map((n) => this.getNode(n));
+      return this.getNodes(this.fillTree, element);
+    }
+  }
+
+  private updateTree(tree: SyntaxNode) {
+    if (tree.item == null) {
+      tree.item = this.getNode(tree);
+    }
+    if (tree.nodes) {
+      for (let i = 0; i < tree.nodes.length; i++) {
+        this.updateTree(tree.nodes[i]);
+      }
+    }
+  }
+
+  private getNodes(
+    tree: SyntaxNode,
+    element?: SyntaxNodeTreeItem
+  ): SyntaxNodeTreeItem[] {
+    if (!tree || !tree.nodes) {
+      return null;
+    }
+    if (element) {
+      const s = this.getSubNote(tree, element.id);
+      if (s && s.nodes) {
+        return s.nodes.map((n) => n.item);
+      }
+      return null;
+    } else {
+      return tree.nodes.map((n) => n.item);
+    }
+  }
+
+  private getSubNote(tree: SyntaxNode, id: string): SyntaxNode {
+    if (!tree || !tree.nodes) {
+      return null;
+    }
+    const first = tree.nodes.find((x) => x.id === id);
+    if (first) {
+      return first;
+    } else {
+      for (let i = 0; i < tree.nodes.length; i++) {
+        const findInSub = this.getSubNote(tree.nodes[i], id);
+        if (findInSub) {
+          return findInSub;
         }
-        return null;
-      });
+      }
+      return null;
     }
   }
 
   private getNode(node: SyntaxNode): SyntaxNodeTreeItem {
-    if (node.nodes && node.nodes.length > 0) {
-      return new SyntaxNodeTreeItem(
-        node.id,
-        node.type,
-        node.kind,
-        vscode.TreeItemCollapsibleState.Collapsed
-      );
-    } else {
-      return new SyntaxNodeTreeItem(
-        node.id,
-        node.type,
-        node.kind,
-        vscode.TreeItemCollapsibleState.None
-      );
-    }
+    return node.nodes && node.nodes.length > 0
+      ? new SyntaxNodeTreeItem(
+          node.id,
+          node.kind,
+          node.type,
+          node.info,
+          vscode.TreeItemCollapsibleState.Collapsed
+        )
+      : new SyntaxNodeTreeItem(
+          node.id,
+          node.kind,
+          node.type,
+          node.info,
+          vscode.TreeItemCollapsibleState.None
+        );
   }
 }
 
@@ -60,25 +178,33 @@ class SyntaxNode {
   id: string;
   kind: string;
   type: string;
+  info: string;
+  start: number;
+  end: number;
+  startLine: number;
+  endLine: number;
 
   nodes: SyntaxNode[];
+
+  item: SyntaxNodeTreeItem;
 }
 
 class SyntaxNodeTreeItem extends vscode.TreeItem {
   constructor(
     public readonly id: string,
     public readonly label: string,
-    private kind: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState
+    private type: string,
+    private info: string,
+    public collapsibleState: vscode.TreeItemCollapsibleState
   ) {
     super(label, collapsibleState);
   }
 
   get tooltip(): string {
-    return `${this.label}-${this.kind}`;
+    return this.info;
   }
 
   get description(): string {
-    return this.kind;
+    return this.type;
   }
 }

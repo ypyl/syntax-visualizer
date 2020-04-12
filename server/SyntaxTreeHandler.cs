@@ -20,8 +20,12 @@ namespace SyntaxVisualizer
         public string id;
         public string type;
         public string kind;
+        public string info;
+        public int startLine;
+        public int endLine;
+        public int start;
+        public int end;
         public List<SNode> nodes;
-
     }
 
     [Parallel, Method("syntaxVisualizer/getSyntaxTree")]
@@ -32,51 +36,104 @@ namespace SyntaxVisualizer
 
     public class SyntaxTreeHandler : ISyntaxTreeHandler
     {
-        private SyntaxWalker walker = new SyntaxWalker();
+        private readonly SyntaxWalker walker = new SyntaxWalker();
+        public Action invalidateTree = () => { };
+
+        public void UpdateInvalidateTree(Action action)
+        {
+            invalidateTree = action;
+        }
 
         public class SyntaxWalker : CSharpSyntaxWalker
         {
+            private int id;
             private SNode current;
-            public SNode SNode { get; private set; } = new SNode();
+            public SNode SNode { get; private set; }
 
             public void Reset()
             {
-                SNode = new SNode();
+                SNode = null;
                 current = SNode;
+            }
+
+            public SyntaxWalker() : base(SyntaxWalkerDepth.Token)
+            {
             }
 
             public override void Visit(SyntaxNode node)
             {
-                current.nodes ??= new List<SNode>();
+                var location = node.GetLocation().GetLineSpan();
                 var n = new SNode
                 {
-                    id = node.FullSpan.ToString(),
+                    id = id.ToString(),
                     kind = node.Kind().ToString(),
-                    type = node.GetType().Name
+                    type = node.GetType().Name,
+                    info = node.FullSpan.ToString(),
+                    start = location.Span.Start.Character,
+                    end = location.Span.End.Character,
+                    startLine = location.Span.Start.Line,
+                    endLine = location.Span.End.Line
                 };
-                current.nodes.Add(n);
+                id++;
+                if (SNode == null)
+                {
+                    SNode = n;
+                }
+                else
+                {
+                    current.nodes ??= new List<SNode>();
+                    current.nodes.Add(n);
+                }
                 var previos = current;
                 current = n;
                 base.Visit(node);
                 current = previos;
             }
+
+            public override void VisitToken(SyntaxToken token)
+            {
+                current.nodes ??= new List<SNode>();
+                var location = token.GetLocation().GetLineSpan();
+                var n = new SNode
+                {
+                    id = id.ToString(),
+                    kind = token.Kind().ToString(),
+                    type = token.GetType().Name,
+                    info = token.ValueText,
+                    start = location.Span.Start.Character,
+                    end = location.Span.End.Character,
+                    startLine = location.Span.Start.Line,
+                    endLine = location.Span.End.Line
+                };
+                id++;
+                current.nodes.Add(n);
+                var previos = current;
+                current = n;
+                base.VisitToken(token);
+                current = previos;
+            }
         }
+
         public void UpdateCurrentCode(string code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
+            if (walker.SNode != null)
+            {
+                invalidateTree();
+            }
             walker.Reset();
             walker.Visit(tree.GetRoot());
         }
 
-        public Task<SNode> Handle(STreeParams request, CancellationToken cancellationToken)
+        public async Task<SNode> Handle(STreeParams request, CancellationToken cancellationToken)
         {
             if (request?.id == null)
             {
-                return Task.FromResult(walker.SNode);
+                return walker.SNode;
             }
             else
             {
-                return Task.FromResult(FindSubTree(request.id, walker.SNode));
+                return FindSubTree(request.id, walker.SNode);
             }
         }
 
