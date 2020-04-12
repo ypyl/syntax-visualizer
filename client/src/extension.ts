@@ -1,18 +1,11 @@
 'use strict';
 
-import {
-  workspace,
-  Disposable,
-  ExtensionContext,
-  commands,
-  window,
-} from 'vscode';
+import { ExtensionContext, commands, window } from 'vscode';
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
 } from 'vscode-languageclient';
-import { Trace } from 'vscode-jsonrpc';
 import { SyntaxNodeProvider } from './syntaxNodeView';
 
 let client: LanguageClient;
@@ -49,7 +42,6 @@ export function activate(context: ExtensionContext) {
     serverOptions,
     clientOptions
   );
-  client.trace = Trace.Verbose;
   client.start();
 
   client.onReady().then(() => {

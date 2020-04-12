@@ -3,3 +3,5 @@ out
 obj
 out
 node_modules
+debug
+release

@@ -72,17 +72,14 @@
             "messages",
             "verbose"
           ],
-          "default": "verbose",
+          "default": "off",
           "description": "Traces the communication between VSCode and the languageServerExample service."
         }
       }
     }
   },
   "scripts": {
-    "vscode:prepublish": "tsc -p ./",
-    "compile": "tsc -p ./",
-    "update-vscode": "node ./node_modules/vscode/bin/install",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "compile": "tsc -p ./"
   },
   "devDependencies": {
     "@types/node": "^13.11.0",

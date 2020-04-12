@@ -21,12 +21,7 @@ namespace SyntaxVisualizer
         private readonly SyntaxTreeHandler _handler;
         private SynchronizationCapability _capability;
 
-        public TextDocumentHandler(SyntaxTreeHandler handler)
-        {
-            _handler = handler;
-        }
-
-        public TextDocumentSyncKind Change { get; } = TextDocumentSyncKind.Incremental;
+        public TextDocumentHandler(SyntaxTreeHandler handler) => _handler = handler;
 
         public Task<Unit> Handle(DidChangeTextDocumentParams notification, CancellationToken token)
         {
@@ -34,19 +29,14 @@ namespace SyntaxVisualizer
             return Unit.Task;
         }
 
-        TextDocumentChangeRegistrationOptions IRegistration<TextDocumentChangeRegistrationOptions>.GetRegistrationOptions()
-        {
-            return new TextDocumentChangeRegistrationOptions()
+        TextDocumentChangeRegistrationOptions IRegistration<TextDocumentChangeRegistrationOptions>.GetRegistrationOptions() =>
+            new TextDocumentChangeRegistrationOptions()
             {
                 DocumentSelector = _documentSelector,
-                SyncKind = Change
+                SyncKind = TextDocumentSyncKind.Incremental
             };
-        }
 
-        public void SetCapability(SynchronizationCapability capability)
-        {
-            _capability = capability;
-        }
+        public void SetCapability(SynchronizationCapability capability) => _capability = capability;
 
         public async Task<Unit> Handle(DidOpenTextDocumentParams notification, CancellationToken token)
         {
@@ -54,18 +44,13 @@ namespace SyntaxVisualizer
             return Unit.Value;
         }
 
-        TextDocumentRegistrationOptions IRegistration<TextDocumentRegistrationOptions>.GetRegistrationOptions()
-        {
-            return new TextDocumentRegistrationOptions
+        TextDocumentRegistrationOptions IRegistration<TextDocumentRegistrationOptions>.GetRegistrationOptions() =>
+            new TextDocumentRegistrationOptions
             {
                 DocumentSelector = _documentSelector,
             };
-        }
 
-        public Task<Unit> Handle(DidCloseTextDocumentParams notification, CancellationToken token)
-        {
-            return Unit.Task;
-        }
+        public Task<Unit> Handle(DidCloseTextDocumentParams notification, CancellationToken token) => Unit.Task;
 
         public Task<Unit> Handle(DidSaveTextDocumentParams notification, CancellationToken token)
         {
@@ -73,18 +58,13 @@ namespace SyntaxVisualizer
             return Unit.Task;
         }
 
-        TextDocumentSaveRegistrationOptions IRegistration<TextDocumentSaveRegistrationOptions>.GetRegistrationOptions()
-        {
-            return new TextDocumentSaveRegistrationOptions()
+        TextDocumentSaveRegistrationOptions IRegistration<TextDocumentSaveRegistrationOptions>.GetRegistrationOptions() =>
+            new TextDocumentSaveRegistrationOptions()
             {
                 DocumentSelector = _documentSelector,
                 IncludeText = true
             };
-        }
 
-        public TextDocumentAttributes GetTextDocumentAttributes(Uri uri)
-        {
-            return new TextDocumentAttributes(uri, "csharp");
-        }
+        public TextDocumentAttributes GetTextDocumentAttributes(Uri uri) => new TextDocumentAttributes(uri, "csharp");
     }
 }

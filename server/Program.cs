@@ -21,7 +21,7 @@ namespace SyntaxVisualizer
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day)
-                .MinimumLevel.Verbose()
+                .MinimumLevel.Error()
               .CreateLogger();
 
             Log.Logger.Information("This only goes file...");
@@ -32,10 +32,9 @@ namespace SyntaxVisualizer
                 options
                     .WithInput(Console.OpenStandardInput())
                     .WithOutput(Console.OpenStandardOutput())
-                    .ConfigureLogging(x => x
-                        .AddSerilog()
+                    .ConfigureLogging(x => x.AddSerilog()
                         .AddLanguageServer()
-                        .SetMinimumLevel(LogLevel.Debug))
+                        .SetMinimumLevel(LogLevel.Error))
                     .WithHandler(handler)
                     .WithHandler(new TextDocumentHandler(handler)));
 
