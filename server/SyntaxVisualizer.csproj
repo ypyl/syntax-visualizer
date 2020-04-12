@@ -8,18 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="OmniSharp.Extensions.JsonRpc">
-            <HintPath>C:\Users\ea_pyl\projects\csharp-language-server-protocol\src\Server\bin\Debug\netstandard2.1\OmniSharp.Extensions.JsonRpc.dll</HintPath>
-        </Reference>
-        <Reference Include="OmniSharp.Extensions.LanguageProtocol">
-            <HintPath>C:\Users\ea_pyl\projects\csharp-language-server-protocol\src\Server\bin\Debug\netstandard2.1\OmniSharp.Extensions.LanguageProtocol.dll</HintPath>
-        </Reference>
-        <Reference Include="OmniSharp.Extensions.LanguageServer">
-            <HintPath>C:\Users\ea_pyl\projects\csharp-language-server-protocol\src\Server\bin\Debug\netstandard2.1\OmniSharp.Extensions.LanguageServer.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
+        <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.16.0" />
         <PackageReference Include="Microsoft.CodeAnalysis" Version="3.6.0-2.final" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
         <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
@@ -30,10 +19,6 @@
         <PackageReference Include="System.Text.Encoding" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
         <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-        <PackageReference Include="System.Reactive" Version="4.3.1" />
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
-        <PackageReference Include="MediatR" Version="8.0.1.0"/>
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.0.0.0"/>
     </ItemGroup>
 
 </Project>

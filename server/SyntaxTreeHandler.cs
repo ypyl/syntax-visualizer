@@ -38,10 +38,16 @@ namespace SyntaxVisualizer
     {
         private readonly SyntaxWalker walker = new SyntaxWalker();
         public Action invalidateTree = () => { };
+        public Action invalidateTree2 = () => { };
 
         public void UpdateInvalidateTree(Action action)
         {
             invalidateTree = action;
+        }
+
+        public void UpdateInvalidateTree2(Action action)
+        {
+            invalidateTree2 = action;
         }
 
         public class SyntaxWalker : CSharpSyntaxWalker

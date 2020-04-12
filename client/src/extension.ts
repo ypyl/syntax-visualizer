@@ -66,7 +66,12 @@ export function activate(context: ExtensionContext) {
     let incorrectTree = false;
 
     client.onNotification('syntaxVisualizer/invalidTree', () => {
-      tree.message = 'Code was changed - try to refresh.';
+      tree.message = 'Code was changed and saved - try to refresh.';
+      incorrectTree = true;
+    });
+
+    client.onNotification('syntaxVisualizer/invalidTree2', () => {
+      tree.message = 'Code was changed - try to save it and refresh.';
       incorrectTree = true;
     });
 

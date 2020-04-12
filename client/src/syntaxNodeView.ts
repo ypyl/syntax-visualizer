@@ -95,7 +95,7 @@ export class SyntaxNodeProvider
   ): vscode.ProviderResult<SyntaxNodeTreeItem[]> {
     if (this.fillTree == null) {
       return this.getTree(null).then((x: SyntaxNode) => {
-        if (x.nodes && x.nodes.length == 1) {
+        if (!!x && !!x.nodes && x.nodes.length == 1) {
           this.fillTree = x.nodes[0];
         } else {
           this.fillTree = x;
@@ -109,6 +109,9 @@ export class SyntaxNodeProvider
   }
 
   private updateTree(tree: SyntaxNode) {
+    if (!tree) {
+      return;
+    }
     if (tree.item == null) {
       tree.item = this.getNode(tree);
     }

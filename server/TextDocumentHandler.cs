@@ -26,10 +26,11 @@ namespace SyntaxVisualizer
             _handler = handler;
         }
 
-        public TextDocumentSyncKind Change { get; } = TextDocumentSyncKind.None;
+        public TextDocumentSyncKind Change { get; } = TextDocumentSyncKind.Incremental;
 
         public Task<Unit> Handle(DidChangeTextDocumentParams notification, CancellationToken token)
         {
+            _handler.invalidateTree2();
             return Unit.Task;
         }
 

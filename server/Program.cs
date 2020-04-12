@@ -40,6 +40,7 @@ namespace SyntaxVisualizer
                     .WithHandler(new TextDocumentHandler(handler)));
 
             handler.UpdateInvalidateTree(() => server.SendNotification("syntaxVisualizer/invalidTree"));
+            handler.UpdateInvalidateTree2(() => server.SendNotification("syntaxVisualizer/invalidTree2"));
 
             await server.WaitForExit;
         }
