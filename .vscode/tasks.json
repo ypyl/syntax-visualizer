@@ -2,12 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "npm",
+      "label": "webpack",
       "windows": {
         "options": { "cwd": "${workspaceFolder}/client" }
       },
       "command": "npm",
-      "args": ["run", "compile"],
+      "args": ["run", "webpack"],
       "type": "shell",
       "problemMatcher": "$tsc-watch"
     },
@@ -25,7 +25,35 @@
     },
     {
       "label": "All",
-      "dependsOn": ["npm", "build"]
+      "dependsOn": ["webpack", "build"]
+    },
+    {
+      "label": "webpack-release",
+      "windows": {
+        "options": { "cwd": "${workspaceFolder}/client" }
+      },
+      "command": "npm",
+      "args": ["run", "webpack-release"],
+      "type": "shell",
+      "problemMatcher": "$tsc-watch"
+    },
+    {
+      "label": "build-release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "-c",
+        "Release",
+        "${workspaceFolder}/server/SyntaxVisualizer.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Release",
+      "dependsOn": ["webpack-release", "build-release"]
     }
   ]
 }

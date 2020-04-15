@@ -1,5 +1,6 @@
 'use strict';
 
+import * as path from 'path';
 import { ExtensionContext, commands, window } from 'vscode';
 import {
   LanguageClient,
@@ -11,20 +12,20 @@ import { SyntaxNodeProvider } from './syntaxNodeView';
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-  let serverExe = 'dotnet';
+  const serverExe = 'dotnet';
+  const serverModule = (name) =>
+    context.asAbsolutePath(
+      path.join('server', 'bin', name, 'netcoreapp3.1', 'SyntaxVisualizer.dll')
+    );
 
   let serverOptions: ServerOptions = {
     run: {
       command: serverExe,
-      args: [
-        'C:/Users/ea_pyl/projects/syntax-visualizer/server/bin/Debug/netcoreapp3.1/SyntaxVisualizer.dll',
-      ],
+      args: [serverModule('release')],
     },
     debug: {
       command: serverExe,
-      args: [
-        'C:/Users/ea_pyl/projects/syntax-visualizer/server/bin/Debug/netcoreapp3.1/SyntaxVisualizer.dll',
-      ],
+      args: [serverModule('debug')],
     },
   };
 

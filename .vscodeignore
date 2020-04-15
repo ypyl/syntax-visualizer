@@ -1,0 +1,11 @@
+.vscode/**
+typings/**
+client/src/**
+**/*.map
+.gitignore
+tsconfig.json
+server/obj/**/*
+server/**/*.cs
+server/**/*.csproj
+server/bin/Debug/**/*
+node_modules
