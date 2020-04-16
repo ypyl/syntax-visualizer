@@ -1,7 +1,9 @@
+# copied from https://www.visualstudiogeeks.com/github/extensions/publish-vscode-extension-using-github-actions
 on:
   push:
     branches:
       - master
+      - 'feature/**' # match an pushes on feature/* and feature/<any sub branch>/*
     paths-ignore: # dont run when changes made to these folders
       - '.vscode/**'
 
