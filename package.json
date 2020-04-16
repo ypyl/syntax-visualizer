@@ -1,7 +1,8 @@
 {
   "name": "syntax-visualizer-csharp",
-  "description": "CSharp syntax visualizer",
-  "publisher": "vscode",
+  "description": "CSharp Syntax Visualizer",
+  "publisher": "ypyl",
+  "displayName": "CSharp Syntax Visualizer",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.43.0"
@@ -80,6 +81,8 @@
   },
   "scripts": {
     "webpack": "webpack --mode development",
+    "deploy": "vsce publish -p",
+    "package": "vsce package",
     "webpack-release": "webpack --mode production",
     "vscode:prepublish": "webpack --mode production"
   },
