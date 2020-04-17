@@ -4,6 +4,7 @@
   "publisher": "ypyl",
   "displayName": "CSharp Syntax Visualizer",
   "version": "0.0.1",
+  "license": "GLWT Public License",
   "engines": {
     "vscode": "^1.43.0"
   },
