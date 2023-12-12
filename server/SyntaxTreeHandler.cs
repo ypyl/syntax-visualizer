@@ -131,15 +131,15 @@ namespace SyntaxVisualizer
             walker.Visit(tree.GetRoot());
         }
 
-        public async Task<SNode> Handle(STreeParams request, CancellationToken cancellationToken)
+        public Task<SNode> Handle(STreeParams request, CancellationToken cancellationToken)
         {
             if (request?.id == null)
             {
-                return walker.SNode;
+                return Task.FromResult(walker.SNode);
             }
             else
             {
-                return FindSubTree(request.id, walker.SNode);
+                return Task.FromResult(FindSubTree(request.id, walker.SNode));
             }
         }
 

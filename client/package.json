@@ -1,28 +1,18 @@
 {
   "name": "syntax-visualizer-csharp",
-  "description": "CSharp Syntax Visualizer",
-  "publisher": "ypyl",
-  "displayName": "CSharp Syntax Visualizer",
+  "description": "client",
+  "publisher": "vscode",
   "version": "0.0.1",
-  "license": "GLWT Public License",
   "engines": {
     "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/eapyl/syntax-visualizer-csharp"
-  },
-  "extensionKind": [
-		"ui",
-		"workspace"
-	],
   "activationEvents": [
     "onView:syntax-visualizer"
   ],
-  "main": "./client/out/extension",
+  "main": "./out/extension",
   "contributes": {
     "viewsWelcome": [
       {
@@ -38,16 +28,6 @@
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
-      },
-      {
-        "command": "calicoColors.addColor",
-        "category": "Calico Colors",
-        "title": "Add Color"
-      },
-      {
-        "command": "calicoColors.clearColors",
-        "category": "Calico Colors",
-        "title": "Clear Colors"
       }
     ],
     "viewsContainers": {
@@ -76,14 +56,13 @@
         },
         {
           "id": "syntax-visualizer-props",
-          "name": "Properties",
-          "type": "webview"
+          "name": "Properties"
         }
       ]
     },
     "configuration": {
       "type": "object",
-      "title": "CSharp syntax visualizer configuration",
+      "title": "Example configuration",
       "properties": {
         "syntaxVisualizerCSharp.maxNumberOfProblems": {
           "type": "number",
@@ -98,27 +77,21 @@
             "verbose"
           ],
           "default": "off",
-          "description": "Traces the communication between VSCode and the CSharp syntax visualizer service."
+          "description": "Traces the communication between VSCode and the languageServerExample service."
         }
       }
     }
   },
   "scripts": {
-    "webpack": "webpack --mode development",
-    "deploy": "vsce publish -p",
-    "package": "vsce package",
-    "webpack-release": "webpack --mode production",
-    "vscode:prepublish": "webpack --mode production"
+    "vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint \"src/**/*.ts\"",
+		"watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/node": "^13.11.0",
-    "@types/vscode": "1.43.0",
-    "ts-loader": "^6.2.2",
-    "typescript": "^3.8.3",
-    "vsce": "^1.75.0",
-    "vscode-test": "^1.3.0",
-    "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "@types/node": "^16.18.34",
+		"@types/vscode": "^1.73.0",
+    "typescript": "^5.3.2"
   },
   "dependencies": {
     "vscode-languageclient": "^6.1.3"

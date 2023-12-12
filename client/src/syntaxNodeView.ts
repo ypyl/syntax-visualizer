@@ -6,6 +6,9 @@ export class SyntaxNodeProvider
     start: vscode.Position,
     end: vscode.Position
   ): SyntaxNodeTreeItem[] {
+    if (!this.fillTree) {
+      return [];
+    }
     return this.searchNodeByPosition(
       this.fillTree,
       start.line,
@@ -22,7 +25,7 @@ export class SyntaxNodeProvider
     endLine: number,
     end: number
   ): SyntaxNodeTreeItem[] {
-    let result = [];
+    let result: SyntaxNodeTreeItem[] = [];
     if (tree.nodes) {
       for (let i = 0; i < tree.nodes.length; i++) {
         let subNode = tree.nodes[i];
@@ -63,8 +66,10 @@ export class SyntaxNodeProvider
   private fillTree?: SyntaxNode;
 
   refresh(): void {
-    this.fillTree = null;
-    this._onDidChangeTreeData.fire();
+    this.fillTree = undefined;
+    if (this._onDidChangeTreeData) {
+      this._onDidChangeTreeData.fire(undefined);
+    }
   }
 
   getTreeItem(element: SyntaxNodeTreeItem): vscode.TreeItem {
@@ -74,10 +79,13 @@ export class SyntaxNodeProvider
   getParent(
     element: SyntaxNodeTreeItem
   ): vscode.ProviderResult<SyntaxNodeTreeItem> {
+    if (!this.fillTree) {
+      return undefined;
+    }
     return this.findParent(this.fillTree, element.id);
   }
 
-  findParent(tree: SyntaxNode, id: string): SyntaxNodeTreeItem {
+  findParent(tree: SyntaxNode, id: string): SyntaxNodeTreeItem | undefined {
     if (tree.nodes.some((x) => x.id === id)) {
       return tree.item;
     } else {
@@ -127,22 +135,22 @@ export class SyntaxNodeProvider
     element?: SyntaxNodeTreeItem
   ): SyntaxNodeTreeItem[] {
     if (!tree || !tree.nodes) {
-      return null;
+      return [];
     }
     if (element) {
       const s = this.getSubNote(tree, element.id);
       if (s && s.nodes) {
         return s.nodes.map((n) => n.item);
       }
-      return null;
+      return [];
     } else {
       return tree.nodes.map((n) => n.item);
     }
   }
 
-  private getSubNote(tree: SyntaxNode, id: string): SyntaxNode {
+  private getSubNote(tree: SyntaxNode, id: string): SyntaxNode | undefined {
     if (!tree || !tree.nodes) {
-      return null;
+      return undefined;
     }
     const first = tree.nodes.find((x) => x.id === id);
     if (first) {
@@ -154,7 +162,7 @@ export class SyntaxNodeProvider
           return findInSub;
         }
       }
-      return null;
+      return undefined;
     }
   }
 
@@ -178,18 +186,18 @@ export class SyntaxNodeProvider
 }
 
 class SyntaxNode {
-  id: string;
-  kind: string;
-  type: string;
-  info: string;
-  start: number;
-  end: number;
-  startLine: number;
-  endLine: number;
+  id!: string;
+  kind!: string;
+  type!: string;
+  info!: string;
+  start!: number;
+  end!: number;
+  startLine!: number;
+  endLine!: number;
 
-  nodes: SyntaxNode[];
+  nodes!: SyntaxNode[];
 
-  item: SyntaxNodeTreeItem;
+  item!: SyntaxNodeTreeItem;
 }
 
 class SyntaxNodeTreeItem extends vscode.TreeItem {
@@ -203,11 +211,7 @@ class SyntaxNodeTreeItem extends vscode.TreeItem {
     super(label, collapsibleState);
   }
 
-  get tooltip(): string {
-    return this.info;
-  }
+  public tooltip: string = this.info;
 
-  get description(): string {
-    return this.type;
-  }
+  public description: string = this.type;
 }

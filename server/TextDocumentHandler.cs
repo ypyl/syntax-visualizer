@@ -12,7 +12,7 @@ namespace SyntaxVisualizer
 {
     internal class TextDocumentHandler : ITextDocumentSyncHandler
     {
-        private readonly DocumentSelector _documentSelector = new DocumentSelector(
+        private readonly DocumentSelector _documentSelector = new(
             new DocumentFilter
             {
                 Pattern = "**/*.cs"
@@ -30,7 +30,7 @@ namespace SyntaxVisualizer
         }
 
         TextDocumentChangeRegistrationOptions IRegistration<TextDocumentChangeRegistrationOptions>.GetRegistrationOptions() =>
-            new TextDocumentChangeRegistrationOptions()
+            new()
             {
                 DocumentSelector = _documentSelector,
                 SyncKind = TextDocumentSyncKind.Incremental
@@ -38,14 +38,14 @@ namespace SyntaxVisualizer
 
         public void SetCapability(SynchronizationCapability capability) => _capability = capability;
 
-        public async Task<Unit> Handle(DidOpenTextDocumentParams notification, CancellationToken token)
+        public Task<Unit> Handle(DidOpenTextDocumentParams notification, CancellationToken token)
         {
             _handler.UpdateCurrentCode(notification.TextDocument.Text);
-            return Unit.Value;
+            return Task.FromResult(Unit.Value);
         }
 
         TextDocumentRegistrationOptions IRegistration<TextDocumentRegistrationOptions>.GetRegistrationOptions() =>
-            new TextDocumentRegistrationOptions
+            new()
             {
                 DocumentSelector = _documentSelector,
             };
@@ -59,12 +59,12 @@ namespace SyntaxVisualizer
         }
 
         TextDocumentSaveRegistrationOptions IRegistration<TextDocumentSaveRegistrationOptions>.GetRegistrationOptions() =>
-            new TextDocumentSaveRegistrationOptions()
+            new()
             {
                 DocumentSelector = _documentSelector,
                 IncludeText = true
             };
 
-        public TextDocumentAttributes GetTextDocumentAttributes(Uri uri) => new TextDocumentAttributes(uri, "csharp");
+        public TextDocumentAttributes GetTextDocumentAttributes(Uri uri) => new(uri, "csharp");
     }
 }
