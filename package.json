@@ -104,11 +104,8 @@
     }
   },
   "scripts": {
-    "webpack": "webpack --mode development",
     "deploy": "vsce publish -p",
-    "package": "vsce package",
-    "webpack-release": "webpack --mode production",
-    "vscode:prepublish": "webpack --mode production"
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/node": "^13.11.0",

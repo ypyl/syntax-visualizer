@@ -219,10 +219,20 @@ class ColorsViewProvider implements WebviewViewProvider {
 				<title>Cat Colors</title>
 			</head>
 			<body>
-				<ul class="color-list">
-				</ul>
-
-				<button class="add-color-button">Add Color</button>
+				<table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Lines</td>
+            <td>10..20</td>
+          </tr>
+          <tr>
+            <td>Type</td>
+            <td>String</td>
+          </tr>
+        </table>
 
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>

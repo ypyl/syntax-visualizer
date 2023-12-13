@@ -76,16 +76,10 @@
         vscode.setState({ colors: colors });
     }
 
-    /**
-     * @param {string} color
-     */
     function onColorClicked(color) {
         vscode.postMessage({ type: 'colorSelected', value: color });
     }
 
-    /**
-     * @returns string
-     */
     function getNewCalicoColor() {
         const colors = ['020202', 'f1eeee', 'a85b20', 'daab70', 'efcb99'];
         return colors[Math.floor(Math.random() * colors.length)];
