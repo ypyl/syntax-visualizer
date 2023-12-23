@@ -28,3 +28,11 @@ table tr:last-child td {
 td, th {
   padding: var(--input-padding-vertical) var(--input-padding-horizontal);
 }
+
+.welcome-view-content {
+  padding: 0 20px 1em;
+}
+
+.welcome-view-content > p {
+  margin-block-start: 1em;
+}

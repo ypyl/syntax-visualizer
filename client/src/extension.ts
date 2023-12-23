@@ -100,25 +100,24 @@ export function activate(context: ExtensionContext) {
       provider.refresh();
     });
 
-    const colorProvider = new ColorsViewProvider(context.extensionUri);
+    const propsProvider = new PropsViewProvider(context.extensionUri);
+
+    tree.onDidChangeSelection((ev) => {
+      if (ev.selection.length === 1) {
+        const selectedTreeItem = ev.selection[0];
+        const selectedItem = provider.getNodeById(selectedTreeItem.id);
+        if (selectedItem) {
+          const { item, nodes, ...data } = selectedItem;
+          propsProvider.selectNode(data);
+        }
+      }
+    });
 
     context.subscriptions.push(
       window.registerWebviewViewProvider(
-        ColorsViewProvider.viewType,
-        colorProvider
+        PropsViewProvider.viewType,
+        propsProvider
       )
-    );
-
-    context.subscriptions.push(
-      commands.registerCommand("calicoColors.addColor", () => {
-        colorProvider.addColor();
-      })
-    );
-
-    context.subscriptions.push(
-      commands.registerCommand("calicoColors.clearColors", () => {
-        colorProvider.clearColors();
-      })
     );
   });
 }
@@ -130,7 +129,7 @@ export function deactivate(): Thenable<void> | undefined {
   return client.stop();
 }
 
-class ColorsViewProvider implements WebviewViewProvider {
+class PropsViewProvider implements WebviewViewProvider {
   public static readonly viewType = "syntax-visualizer-props";
 
   private _view?: WebviewView;
@@ -152,29 +151,12 @@ class ColorsViewProvider implements WebviewViewProvider {
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-    webviewView.webview.onDidReceiveMessage((data) => {
-      switch (data.type) {
-        case "colorSelected": {
-          window.activeTextEditor?.insertSnippet(
-            new SnippetString(`#${data.value}`)
-          );
-          break;
-        }
-      }
-    });
   }
 
-  public addColor() {
+  public selectNode(data: object) {
     if (this._view) {
       this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-      this._view.webview.postMessage({ type: "addColor" });
-    }
-  }
-
-  public clearColors() {
-    if (this._view) {
-      this._view.webview.postMessage({ type: "clearColors" });
+      this._view.webview.postMessage({ type: "node", data: data });
     }
   }
 
@@ -203,11 +185,6 @@ class ColorsViewProvider implements WebviewViewProvider {
 			<head>
 				<meta charset="UTF-8">
 
-				<!--
-					Use a content security policy to only allow loading styles from our extension directory,
-					and only allow scripts that have a specific nonce.
-					(See the 'webview-sample' extension sample for img-src content security policy examples)
-				-->
 				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -219,20 +196,9 @@ class ColorsViewProvider implements WebviewViewProvider {
 				<title>Cat Colors</title>
 			</head>
 			<body>
-				<table>
-          <tr>
-            <th>Property</th>
-            <th>Value</th>
-          </tr>
-          <tr>
-            <td>Lines</td>
-            <td>10..20</td>
-          </tr>
-          <tr>
-            <td>Type</td>
-            <td>String</td>
-          </tr>
-        </table>
+        <div class="welcome-view-content">
+        <p>Select a node to see its properties.</p>
+        </div>
 
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>

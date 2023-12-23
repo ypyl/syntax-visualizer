@@ -1,7 +1,8 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export class SyntaxNodeProvider
-  implements vscode.TreeDataProvider<SyntaxNodeTreeItem> {
+  implements vscode.TreeDataProvider<SyntaxNodeTreeItem>
+{
   getNodeItemByPosition(
     start: vscode.Position,
     end: vscode.Position
@@ -57,13 +58,12 @@ export class SyntaxNodeProvider
   private _onDidChangeTreeData: vscode.EventEmitter<
     SyntaxNodeTreeItem | undefined
   > = new vscode.EventEmitter<SyntaxNodeTreeItem | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<
-    SyntaxNodeTreeItem | undefined
-  > = this._onDidChangeTreeData.event;
+  readonly onDidChangeTreeData: vscode.Event<SyntaxNodeTreeItem | undefined> =
+    this._onDidChangeTreeData.event;
 
   constructor(private getTree: (params: any) => Promise<any>) {}
 
-  private fillTree?: SyntaxNode;
+  public fillTree?: SyntaxNode;
 
   refresh(): void {
     this.fillTree = undefined;
@@ -91,6 +91,26 @@ export class SyntaxNodeProvider
     } else {
       for (let i = 0; i < tree.nodes.length; i++) {
         const subResult = this.findParent(tree.nodes[i], id);
+        if (subResult) {
+          return subResult;
+        }
+      }
+    }
+  }
+
+  getNodeById(elementId: string): SyntaxNode | undefined {
+    if (!this.fillTree) {
+      return undefined;
+    }
+    return this.findNode(this.fillTree, elementId);
+  }
+
+  findNode(tree: SyntaxNode, id: string): SyntaxNode | undefined {
+    if (tree.id === id) {
+      return tree;
+    } else if (tree.nodes) {
+      for (let i = 0; i < tree.nodes.length; i++) {
+        const subResult = this.findNode(tree.nodes[i], id);
         if (subResult) {
           return subResult;
         }
