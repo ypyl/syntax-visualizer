@@ -52,7 +52,7 @@ jobs:
         run: dotnet restore server/SyntaxVisualizer.csproj
 
       - name: update metadata in package.json
-        uses: onlyutkarsh/patch-files-action@v1.0.1
+        uses: onlyutkarsh/patch-files-action@v1.0.5
         with:
           files: '${{github.workspace}}/package.json'
           patch-syntax: |
@@ -61,7 +61,7 @@ jobs:
             = /description => "CSharp Syntax Visualizer"
 
       - name: add version in CHANGELOG.md
-        uses: cschleiden/replace-tokens@v1.0
+        uses: cschleiden/replace-tokens@v1.2
         with:
           files: '${{github.workspace}}/CHANGELOG.md'
         env:
