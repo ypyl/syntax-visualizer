@@ -10,11 +10,17 @@ using OmniSharp.Extensions.JsonRpc;
 
 namespace SyntaxVisualizer
 {
+    /// <summary>
+    /// Represents the parameters for a request to get the syntax tree.
+    /// </summary>
     public class STreeParams : IRequest<SNode>
     {
         public string id;
     }
 
+    /// <summary>
+    /// Represents a node in the syntax tree.
+    /// </summary>
     public class SNode
     {
         public string Id;
@@ -29,44 +35,74 @@ namespace SyntaxVisualizer
         public List<SNode> nodes;
     }
 
+    /// <summary>
+    /// Interface for handling syntax tree requests.
+    /// </summary>
     [Parallel, Method("syntaxVisualizer/getSyntaxTree")]
     interface ISyntaxTreeHandler : IJsonRpcHandler, IJsonRpcRequestHandler<STreeParams, SNode>
     {
 
     }
 
+    /// <summary>
+    /// Implementation of the syntax tree handler.
+    /// </summary>
     public class SyntaxTreeHandler : ISyntaxTreeHandler
     {
-        private readonly SyntaxWalker walker = new SyntaxWalker();
+        // SyntaxWalker for traversing the syntax tree.
+        private readonly SyntaxWalker walker = new();
+        // Action to invalidate the syntax tree.
         public Action invalidateTree = () => { };
+        // Another action to invalidate the syntax tree.
         public Action invalidateTree2 = () => { };
 
+        /// <summary>
+        /// Updates the action to invalidate the syntax tree.
+        /// </summary>
+        /// <param name="action"></param>
         public void UpdateInvalidateTree(Action action)
         {
             invalidateTree = action;
         }
 
+        /// <summary>
+        /// Updates another action to invalidate the syntax tree.
+        /// </summary>
+        /// <param name="action"></param>
         public void UpdateInvalidateTree2(Action action)
         {
             invalidateTree2 = action;
         }
 
+        /// <summary>
+        /// SyntaxWalker for traversing the syntax tree and building the SNode structure.
+        /// </summary>
         public class SyntaxWalker : CSharpSyntaxWalker
         {
             private int id;
             private SNode current;
             public SNode SNode { get; private set; }
 
+            /// <summary>
+            /// Resets the SyntaxWalker state.
+            /// </summary>
             public void Reset()
             {
                 SNode = null;
                 current = SNode;
             }
 
+            /// <summary>
+            /// Constructor for the SyntaxWalker.
+            /// </summary>
             public SyntaxWalker() : base(SyntaxWalkerDepth.Token)
             {
             }
 
+            /// <summary>
+            /// Visits a syntax node and creates an <see cref="SNode"> for it.
+            /// </summary>
+            /// <param name="node"></param>
             public override void Visit(SyntaxNode node)
             {
                 var location = node.GetLocation().GetLineSpan();
@@ -83,7 +119,7 @@ namespace SyntaxVisualizer
                     LineEnd = location.Span.End.Line
                 };
                 id++;
-                if (SNode == null)
+                if (SNode is null)
                 {
                     SNode = n;
                 }
@@ -98,6 +134,10 @@ namespace SyntaxVisualizer
                 current = previos;
             }
 
+            /// <summary>
+            /// Visits a syntax token and creates an <see cref="SNode"> for it.
+            /// </summary>
+            /// <param name="token"></param>
             public override void VisitToken(SyntaxToken token)
             {
                 current.nodes ??= new List<SNode>();
@@ -123,10 +163,14 @@ namespace SyntaxVisualizer
             }
         }
 
+        /// <summary>
+        /// Updates the current code and builds the syntax tree.
+        /// </summary>
+        /// <param name="code"></param>
         public void UpdateCurrentCode(string code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
-            if (walker.SNode != null)
+            if (walker.SNode is not null)
             {
                 invalidateTree();
             }
@@ -134,9 +178,15 @@ namespace SyntaxVisualizer
             walker.Visit(tree.GetRoot());
         }
 
+        /// <summary>
+        /// Handles the syntax tree request.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public Task<SNode> Handle(STreeParams request, CancellationToken cancellationToken)
         {
-            if (request?.id == null)
+            if (request?.id is null)
             {
                 return Task.FromResult(walker.SNode);
             }
@@ -146,19 +196,25 @@ namespace SyntaxVisualizer
             }
         }
 
+        /// <summary>
+        /// Finds a subtree with the specified id in the syntax tree.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
         private SNode FindSubTree(string id, SNode node)
         {
-            if (node.nodes == null)
+            if (node.nodes is null)
             {
                 return null;
             }
             var n = node.nodes.FirstOrDefault(x => x.Id == id);
-            if (n == null)
+            if (n is null)
             {
                 foreach (var subNote in node.nodes)
                 {
                     var t = FindSubTree(id, subNote);
-                    if (t != null)
+                    if (t is not null)
                     {
                         return t;
                     }
