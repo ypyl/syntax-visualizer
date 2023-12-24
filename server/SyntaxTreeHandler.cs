@@ -17,14 +17,15 @@ namespace SyntaxVisualizer
 
     public class SNode
     {
-        public string id;
-        public string type;
-        public string kind;
-        public string info;
-        public int startLine;
-        public int endLine;
-        public int start;
-        public int end;
+        public string Id;
+        public string Type;
+        public string Kind;
+        public string FullSpan;
+        public string ValueText;
+        public int LineStart;
+        public int LineEnd;
+        public int ColumnStart;
+        public int ColumnEnd;
         public List<SNode> nodes;
     }
 
@@ -71,14 +72,15 @@ namespace SyntaxVisualizer
                 var location = node.GetLocation().GetLineSpan();
                 var n = new SNode
                 {
-                    id = id.ToString(),
-                    kind = node.Kind().ToString(),
-                    type = node.GetType().Name,
-                    info = node.FullSpan.ToString(),
-                    start = location.Span.Start.Character,
-                    end = location.Span.End.Character,
-                    startLine = location.Span.Start.Line,
-                    endLine = location.Span.End.Line
+                    Id = id.ToString(),
+                    Kind = node.Kind().ToString(),
+                    Type = node.GetType().Name,
+                    FullSpan = node.FullSpan.ToString(),
+                    ValueText = node.GetText().ToString(),
+                    ColumnStart = location.Span.Start.Character,
+                    ColumnEnd = location.Span.End.Character,
+                    LineStart = location.Span.Start.Line,
+                    LineEnd = location.Span.End.Line
                 };
                 id++;
                 if (SNode == null)
@@ -102,14 +104,15 @@ namespace SyntaxVisualizer
                 var location = token.GetLocation().GetLineSpan();
                 var n = new SNode
                 {
-                    id = id.ToString(),
-                    kind = token.Kind().ToString(),
-                    type = token.GetType().Name,
-                    info = token.ValueText,
-                    start = location.Span.Start.Character,
-                    end = location.Span.End.Character,
-                    startLine = location.Span.Start.Line,
-                    endLine = location.Span.End.Line
+                    Id = id.ToString(),
+                    Kind = token.Kind().ToString(),
+                    Type = token.GetType().Name,
+                    FullSpan = token.FullSpan.ToString(),
+                    ValueText = token.ValueText,
+                    ColumnStart = location.Span.Start.Character,
+                    ColumnEnd = location.Span.End.Character,
+                    LineStart = location.Span.Start.Line,
+                    LineEnd = location.Span.End.Line
                 };
                 id++;
                 current.nodes.Add(n);
@@ -149,7 +152,7 @@ namespace SyntaxVisualizer
             {
                 return null;
             }
-            var n = node.nodes.FirstOrDefault(x => x.id == id);
+            var n = node.nodes.FirstOrDefault(x => x.Id == id);
             if (n == null)
             {
                 foreach (var subNote in node.nodes)

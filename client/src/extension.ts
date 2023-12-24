@@ -4,7 +4,11 @@ import * as path from "path";
 import {
   CancellationToken,
   ExtensionContext,
+  Position,
+  Range,
+  Selection,
   SnippetString,
+  TextEditorRevealType,
   Uri,
   Webview,
   WebviewView,
@@ -79,12 +83,21 @@ export function activate(context: ExtensionContext) {
       incorrectTree = true;
     });
 
+    let skipRevealNext = 0;
+
     window.onDidChangeTextEditorSelection(async (ev) => {
+      if (skipRevealNext > 0) {
+        skipRevealNext--;
+        return;
+      }
       if (tree.visible && ev.selections.length > 0 && !incorrectTree) {
         const nodeItems = provider.getNodeItemByPosition(
           ev.selections[0].start,
           ev.selections[0].end
         );
+        if (nodeItems.length) {
+          skipRevealNext += nodeItems.length;
+        }
         for (let i = 0; i < nodeItems.length; i++) {
           await tree.reveal(nodeItems[i], {
             select: true,
@@ -93,6 +106,8 @@ export function activate(context: ExtensionContext) {
         }
       }
     });
+
+    const editor = window.activeTextEditor;
 
     commands.registerCommand("syntaxVisualizer.refreshEntry", () => {
       tree.message = undefined;
@@ -107,8 +122,41 @@ export function activate(context: ExtensionContext) {
         const selectedTreeItem = ev.selection[0];
         const selectedItem = provider.getNodeById(selectedTreeItem.id);
         if (selectedItem) {
-          const { item, nodes, ...data } = selectedItem;
-          propsProvider.selectNode(data);
+          const { item, nodes, id, ...data } = selectedItem;
+          if (skipRevealNext <= 1) {
+            propsProvider.selectNode(data);
+          }
+          if (skipRevealNext > 0) {
+            skipRevealNext--;
+            return;
+          }
+          if (editor) {
+            // Specify the line and character position where you want to move the cursor
+            const newStartPosition = new Position(
+              selectedItem.lineStart,
+              selectedItem.columnStart
+            );
+            const newEndPosition = new Position(
+              selectedItem.lineEnd,
+              selectedItem.columnEnd
+            );
+
+            // Create a new selection with the specified position
+            const newSelection = new Selection(
+              newStartPosition,
+              newEndPosition
+            );
+
+            // Set the editor's selection to the new selection
+            editor.selection = newSelection;
+
+            // Scroll to the new cursor position
+            editor.revealRange(
+              new Range(newStartPosition, newEndPosition),
+              TextEditorRevealType.InCenter
+            );
+            skipRevealNext++;
+          }
         }
       }
     });

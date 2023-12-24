@@ -30,11 +30,11 @@ export class SyntaxNodeProvider
     if (tree.nodes) {
       for (let i = 0; i < tree.nodes.length; i++) {
         let subNode = tree.nodes[i];
-        if (subNode.startLine <= startLine && subNode.endLine >= endLine) {
-          if (subNode.startLine == startLine && subNode.start > start) {
+        if (subNode.lineStart <= startLine && subNode.lineEnd >= endLine) {
+          if (subNode.lineStart == startLine && subNode.columnStart > start) {
             continue;
           }
-          if (subNode.endLine == endLine && subNode.end < end) {
+          if (subNode.lineEnd == endLine && subNode.columnEnd < end) {
             continue;
           }
           result.push(subNode.item);
@@ -187,21 +187,15 @@ export class SyntaxNodeProvider
   }
 
   private getNode(node: SyntaxNode): SyntaxNodeTreeItem {
-    return node.nodes && node.nodes.length > 0
-      ? new SyntaxNodeTreeItem(
-          node.id,
-          node.kind,
-          node.type,
-          node.info,
-          vscode.TreeItemCollapsibleState.Collapsed
-        )
-      : new SyntaxNodeTreeItem(
-          node.id,
-          node.kind,
-          node.type,
-          node.info,
-          vscode.TreeItemCollapsibleState.None
-        );
+    return new SyntaxNodeTreeItem(
+      node.id,
+      node.kind,
+      node.type,
+      node.fullSpan ?? node.valueText,
+      node.nodes && node.nodes.length
+        ? vscode.TreeItemCollapsibleState.Collapsed
+        : vscode.TreeItemCollapsibleState.None
+    );
   }
 }
 
@@ -209,11 +203,12 @@ class SyntaxNode {
   id!: string;
   kind!: string;
   type!: string;
-  info!: string;
-  start!: number;
-  end!: number;
-  startLine!: number;
-  endLine!: number;
+  fullSpan!: string;
+  valueText!: string;
+  columnStart!: number;
+  columnEnd!: number;
+  lineStart!: number;
+  lineEnd!: number;
 
   nodes!: SyntaxNode[];
 

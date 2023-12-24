@@ -22,10 +22,34 @@
       tdKey.textContent = key;
       tr.appendChild(tdKey);
       const tdValue = document.createElement("td");
+      tdValue.classList.add("collapsed");
       tdValue.textContent = data[key];
+      const originalText = tdValue.textContent;
+
+      // Check if the text exceeds 120 characters
+      if (originalText && originalText.length > 120) {
+        // Trim the text to 120 characters and add an ellipsis
+        var truncatedText = originalText.substring(0, 120) + "…";
+
+        // Set the truncated text as the content
+        tdValue.textContent = truncatedText;
+
+        // Add a click event listener to toggle between collapsed and expanded state
+        tdValue.addEventListener("click", function () {
+          if (tdValue.classList.contains("collapsed")) {
+            // Expand the text
+            tdValue.textContent = originalText;
+            tdValue.classList.remove("collapsed");
+          } else {
+            // Collapse the text
+            tdValue.textContent = truncatedText;
+            tdValue.classList.add("collapsed");
+          }
+        });
+      }
       tr.appendChild(tdValue);
       table.appendChild(tr);
     }
-    body.appendChild(table)
+    body.appendChild(table);
   }
 })();

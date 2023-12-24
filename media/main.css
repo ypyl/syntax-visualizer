@@ -16,7 +16,7 @@ table {
 }
 table td,
 table th {
-  border-bottom: 1px solid var(--vscode-foreground);;
+  border-bottom: 1px solid var(--vscode-foreground);
 }
 table tr:first-child th {
   border-top: 0;
@@ -25,7 +25,8 @@ table tr:last-child td {
   border-bottom: 0;
 }
 
-td, th {
+td,
+th {
   padding: var(--input-padding-vertical) var(--input-padding-horizontal);
 }
 
@@ -35,4 +36,13 @@ td, th {
 
 .welcome-view-content > p {
   margin-block-start: 1em;
+}
+
+table tr td:first-child {
+  text-transform: capitalize;
+}
+
+.collapsed {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
