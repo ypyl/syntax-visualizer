@@ -1,8 +1,11 @@
+// Import the necessary module from vscode
 import * as vscode from "vscode";
 
+// Define the SyntaxNodeProvider class that implements TreeDataProvider for the syntax tree
 export class SyntaxNodeProvider
   implements vscode.TreeDataProvider<SyntaxNodeTreeItem>
 {
+  // Method to get SyntaxNodeTreeItems based on a given position range
   getNodeItemByPosition(
     start: vscode.Position,
     end: vscode.Position
@@ -19,6 +22,7 @@ export class SyntaxNodeProvider
     );
   }
 
+  // Recursive method to search for SyntaxNodeTreeItems within a given position range
   private searchNodeByPosition(
     tree: SyntaxNode,
     startLine: number,
@@ -55,16 +59,20 @@ export class SyntaxNodeProvider
     return result;
   }
 
+  // Event emitter for tree data changes
   private _onDidChangeTreeData: vscode.EventEmitter<
     SyntaxNodeTreeItem | undefined
   > = new vscode.EventEmitter<SyntaxNodeTreeItem | undefined>();
   readonly onDidChangeTreeData: vscode.Event<SyntaxNodeTreeItem | undefined> =
     this._onDidChangeTreeData.event;
 
+  // Constructor for SyntaxNodeProvider, taking a function to get the syntax tree
   constructor(private getTree: (params: any) => Promise<any>) {}
 
+  // Variable to store the syntax tree
   public fillTree?: SyntaxNode;
 
+  // Method to refresh the tree
   refresh(): void {
     this.fillTree = undefined;
     if (this._onDidChangeTreeData) {
@@ -72,10 +80,12 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Get the tree item for a given element
   getTreeItem(element: SyntaxNodeTreeItem): vscode.TreeItem {
     return element;
   }
 
+  // Get the parent of a tree item
   getParent(
     element: SyntaxNodeTreeItem
   ): vscode.ProviderResult<SyntaxNodeTreeItem> {
@@ -85,6 +95,7 @@ export class SyntaxNodeProvider
     return this.findParent(this.fillTree, element.id);
   }
 
+  // Find the parent of a tree node by ID
   findParent(tree: SyntaxNode, id: string): SyntaxNodeTreeItem | undefined {
     if (tree.nodes.some((x) => x.id === id)) {
       return tree.item;
@@ -98,6 +109,7 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Get a syntax node by its ID
   getNodeById(elementId: string): SyntaxNode | undefined {
     if (!this.fillTree) {
       return undefined;
@@ -105,6 +117,7 @@ export class SyntaxNodeProvider
     return this.findNode(this.fillTree, elementId);
   }
 
+  // Recursive method to find a syntax node by ID
   findNode(tree: SyntaxNode, id: string): SyntaxNode | undefined {
     if (tree.id === id) {
       return tree;
@@ -118,6 +131,7 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Get the children of a tree item
   getChildren(
     element?: SyntaxNodeTreeItem
   ): vscode.ProviderResult<SyntaxNodeTreeItem[]> {
@@ -136,6 +150,7 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Update the tree by adding item objects
   private updateTree(tree: SyntaxNode) {
     if (!tree) {
       return;
@@ -150,6 +165,7 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Get the nodes of a tree item
   private getNodes(
     tree: SyntaxNode,
     element?: SyntaxNodeTreeItem
@@ -168,6 +184,7 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Get the subtree of a tree item
   private getSubNote(tree: SyntaxNode, id: string): SyntaxNode | undefined {
     if (!tree || !tree.nodes) {
       return undefined;
@@ -186,6 +203,7 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Create a SyntaxNodeTreeItem from a SyntaxNode
   private getNode(node: SyntaxNode): SyntaxNodeTreeItem {
     return new SyntaxNodeTreeItem(
       node.id,
@@ -199,6 +217,7 @@ export class SyntaxNodeProvider
   }
 }
 
+// Define the SyntaxNode class to represent a node in the syntax tree
 class SyntaxNode {
   id!: string;
   kind!: string;
@@ -215,6 +234,7 @@ class SyntaxNode {
   item!: SyntaxNodeTreeItem;
 }
 
+// Define the SyntaxNodeTreeItem class, extending vscode.TreeItem
 class SyntaxNodeTreeItem extends vscode.TreeItem {
   constructor(
     public readonly id: string,
@@ -226,7 +246,9 @@ class SyntaxNodeTreeItem extends vscode.TreeItem {
     super(label, collapsibleState);
   }
 
+  // Tooltip for the tree item
   public tooltip: string = this.info;
 
+  // Description for the tree item
   public description: string = this.type;
 }

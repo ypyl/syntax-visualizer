@@ -7,7 +7,6 @@ import {
   Position,
   Range,
   Selection,
-  SnippetString,
   TextEditorRevealType,
   Uri,
   Webview,
@@ -24,15 +23,19 @@ import {
 } from "vscode-languageclient";
 import { SyntaxNodeProvider } from "./syntaxNodeView";
 
+// Initialize LanguageClient instance
 let client: LanguageClient;
 
+// Function to activate the extension
 export function activate(context: ExtensionContext) {
+  // Define server information
   const serverExe = "dotnet";
   const serverModule = (name: string) =>
     context.asAbsolutePath(
       path.join("server", "bin", name, "net7.0", "SyntaxVisualizer.dll")
     );
 
+  // Configure server options
   let serverOptions: ServerOptions = {
     run: {
       command: serverExe,
@@ -44,6 +47,7 @@ export function activate(context: ExtensionContext) {
     },
   };
 
+  // Configure client options
   let clientOptions: LanguageClientOptions = {
     documentSelector: [{ scheme: "file", language: "csharp" }],
     progressOnInitialization: true,
@@ -52,6 +56,7 @@ export function activate(context: ExtensionContext) {
     },
   };
 
+  // Create LanguageClient instance
   client = new LanguageClient(
     "syntaxVisualizerCSharp",
     "Syntax Visualizer C#",
@@ -60,12 +65,16 @@ export function activate(context: ExtensionContext) {
   );
   client.start();
 
+  // Execute when the client is ready
   client.onReady().then(() => {
+    // Function to get the syntax tree from the client
     const getTree = (params: any) =>
       client.sendRequest<any>("syntaxVisualizer/getSyntaxTree", params);
 
+    // Create SyntaxNodeProvider instance
     const provider = new SyntaxNodeProvider(getTree);
 
+    // Create and configure tree view
     const tree = window.createTreeView("syntax-visualizer", {
       treeDataProvider: provider,
       showCollapseAll: true,
@@ -73,6 +82,7 @@ export function activate(context: ExtensionContext) {
 
     let incorrectTree = false;
 
+    // Handle notifications from the client
     client.onNotification("syntaxVisualizer/invalidTree", () => {
       tree.message = "Code was changed and saved - try to refresh.";
       incorrectTree = true;
@@ -85,6 +95,7 @@ export function activate(context: ExtensionContext) {
 
     let skipRevealNext = 0;
 
+    // Handle changes in text editor selection
     window.onDidChangeTextEditorSelection(async (ev) => {
       if (skipRevealNext > 0) {
         skipRevealNext--;
@@ -107,16 +118,20 @@ export function activate(context: ExtensionContext) {
       }
     });
 
+    // Get the active text editor
     const editor = window.activeTextEditor;
 
+    // Register command to refresh the tree view
     commands.registerCommand("syntaxVisualizer.refreshEntry", () => {
       tree.message = undefined;
       incorrectTree = false;
       provider.refresh();
     });
 
+    // Create PropsViewProvider instance
     const propsProvider = new PropsViewProvider(context.extensionUri);
 
+    // Handle tree view selection changes
     tree.onDidChangeSelection((ev) => {
       if (ev.selection.length === 1) {
         const selectedTreeItem = ev.selection[0];
@@ -161,6 +176,7 @@ export function activate(context: ExtensionContext) {
       }
     });
 
+    // Register webview view provider
     context.subscriptions.push(
       window.registerWebviewViewProvider(
         PropsViewProvider.viewType,
@@ -170,6 +186,7 @@ export function activate(context: ExtensionContext) {
   });
 }
 
+// Function to deactivate the extension
 export function deactivate(): Thenable<void> | undefined {
   if (!client) {
     return undefined;
@@ -177,6 +194,7 @@ export function deactivate(): Thenable<void> | undefined {
   return client.stop();
 }
 
+// Class for providing webview view for node properties
 class PropsViewProvider implements WebviewViewProvider {
   public static readonly viewType = "syntax-visualizer-props";
 
@@ -184,6 +202,7 @@ class PropsViewProvider implements WebviewViewProvider {
 
   constructor(private readonly _extensionUri: Uri) {}
 
+  // Resolve webview view
   public resolveWebviewView(
     webviewView: WebviewView,
     context: WebviewViewResolveContext,
@@ -191,30 +210,30 @@ class PropsViewProvider implements WebviewViewProvider {
   ) {
     this._view = webviewView;
 
+    // Configure webview options
     webviewView.webview.options = {
-      // Allow scripts in the webview
       enableScripts: true,
-
       localResourceRoots: [this._extensionUri],
     };
 
+    // Set HTML content for the webview
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
   }
 
+  // Send selected node data to the webview
   public selectNode(data: object) {
     if (this._view) {
-      this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
+      this._view.show?.(true);
       this._view.webview.postMessage({ type: "node", data: data });
     }
   }
 
+  // Generate HTML content for the webview
   private _getHtmlForWebview(webview: Webview) {
-    // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
     const scriptUri = webview.asWebviewUri(
       Uri.joinPath(this._extensionUri, "media", "main.js")
     );
 
-    // Do the same for the stylesheet.
     const styleResetUri = webview.asWebviewUri(
       Uri.joinPath(this._extensionUri, "media", "reset.css")
     );
@@ -225,7 +244,6 @@ class PropsViewProvider implements WebviewViewProvider {
       Uri.joinPath(this._extensionUri, "media", "main.css")
     );
 
-    // Use a nonce to only allow a specific script to be run.
     const nonce = getNonce();
 
     return `<!DOCTYPE html>
@@ -254,6 +272,7 @@ class PropsViewProvider implements WebviewViewProvider {
   }
 }
 
+// Function to generate a nonce
 function getNonce() {
   let text = "";
   const possible =
