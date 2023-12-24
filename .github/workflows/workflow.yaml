@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: fetch all history and tags from all branches for gitversion
         run: git fetch --prune --unshallow
@@ -36,7 +36,7 @@ jobs:
           echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
 
       - name: setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: '16.x'
 
