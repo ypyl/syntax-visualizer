@@ -16,9 +16,9 @@
     "url": "https://github.com/eapyl/syntax-visualizer-csharp"
   },
   "extensionKind": [
-		"ui",
-		"workspace"
-	],
+    "ui",
+    "workspace"
+  ],
   "activationEvents": [
     "onView:syntax-visualizer"
   ],
@@ -104,12 +104,17 @@
     }
   },
   "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./client/src/extension.ts --bundle --outfile=client/out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
     "deploy": "vsce publish -p",
-    "package": "vsce package"
+    "package": "vsce package",
+    "test-compile": "tsc -p ./"
   },
   "devDependencies": {
     "@types/node": "^13.11.0",
     "@types/vscode": "1.43.0",
+    "esbuild": "^0.19.10",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",
     "vsce": "^1.75.0",

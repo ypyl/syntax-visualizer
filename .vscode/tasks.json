@@ -4,9 +4,9 @@
     {
       "label": "npm",
       "options": {
-        "cwd": "${workspaceFolder}/client"
+        "cwd": "${workspaceFolder}"
       },
-      "script": "compile",
+      "script": "esbuild",
       "type": "npm",
       "problemMatcher": "$tsc-watch"
     },
