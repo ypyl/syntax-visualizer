@@ -8,4 +8,4 @@ Make a simpler version of [Syntax visualizer from Visual Studio](https://github.
 
 # Example
 
-![samle](./media/screenshot.png)
+![samle](https://github.com/ypyl/syntax-visualizer/blob/master/media/screenshot.png?raw=true)
