@@ -15,6 +15,7 @@ import {
   WebviewViewResolveContext,
   commands,
   window,
+  workspace,
 } from "vscode";
 import {
   LanguageClient,
@@ -67,9 +68,15 @@ export function activate(context: ExtensionContext) {
 
   // Execute when the client is ready
   client.onReady().then(() => {
+    // Get the active text editor
+    let editor = window.activeTextEditor;
+
     // Function to get the syntax tree from the client
-    const getTree = (params: any) =>
-      client.sendRequest<any>("syntaxVisualizer/getSyntaxTree", params);
+    const getTree = (params: any) => {
+      return client.sendRequest<any>("syntaxVisualizer/getSyntaxTree", {
+        text: editor?.document.getText(),
+      });
+    };
 
     // Create SyntaxNodeProvider instance
     const provider = new SyntaxNodeProvider(getTree);
@@ -80,35 +87,14 @@ export function activate(context: ExtensionContext) {
       showCollapseAll: true,
     });
 
-    let incorrectTree = false;
-
-    // Handle notifications from the client
-    client.onNotification("syntaxVisualizer/invalidTree", () => {
-      tree.message = "Code was changed and saved - try to refresh.";
-      incorrectTree = true;
-    });
-
-    client.onNotification("syntaxVisualizer/invalidTree2", () => {
-      tree.message = "Code was changed - try to save it and refresh.";
-      incorrectTree = true;
-    });
-
-    let skipRevealNext = 0;
 
     // Handle changes in text editor selection
     window.onDidChangeTextEditorSelection(async (ev) => {
-      if (skipRevealNext > 0) {
-        skipRevealNext--;
-        return;
-      }
-      if (tree.visible && ev.selections.length > 0 && !incorrectTree) {
+      if (tree.visible && ev.selections.length > 0) {
         const nodeItems = provider.getNodeItemByPosition(
           ev.selections[0].start,
           ev.selections[0].end
         );
-        if (nodeItems.length) {
-          skipRevealNext += nodeItems.length;
-        }
         for (let i = 0; i < nodeItems.length; i++) {
           await tree.reveal(nodeItems[i], {
             select: true,
@@ -118,13 +104,27 @@ export function activate(context: ExtensionContext) {
       }
     });
 
-    // Get the active text editor
-    const editor = window.activeTextEditor;
+    window.onDidChangeActiveTextEditor((e) => {
+      if (e?.document.fileName.endsWith("cs")) {
+        editor = e;
+        tree.message = undefined;
+        provider.refresh();
+      } else {
+        editor = undefined;
+        provider.reset();
+      }
+    });
+
+    workspace.onDidChangeTextDocument(e => {
+      if (e.document.fileName === editor?.document.fileName) {
+        tree.message = undefined;
+        provider.refresh();
+      }
+    })
 
     // Register command to refresh the tree view
     commands.registerCommand("syntaxVisualizer.refreshEntry", () => {
       tree.message = undefined;
-      incorrectTree = false;
       provider.refresh();
     });
 
@@ -138,40 +138,33 @@ export function activate(context: ExtensionContext) {
         const selectedItem = provider.getNodeById(selectedTreeItem.id);
         if (selectedItem) {
           const { item, nodes, id, ...data } = selectedItem;
-          if (skipRevealNext <= 1) {
-            propsProvider.selectNode(data);
-          }
-          if (skipRevealNext > 0) {
-            skipRevealNext--;
-            return;
-          }
-          if (editor) {
-            // Specify the line and character position where you want to move the cursor
-            const newStartPosition = new Position(
-              selectedItem.lineStart,
-              selectedItem.columnStart
-            );
-            const newEndPosition = new Position(
-              selectedItem.lineEnd,
-              selectedItem.columnEnd
-            );
+          propsProvider.selectNode(data);
+          // if (editor) {
+          //   // Specify the line and character position where you want to move the cursor
+          //   const newStartPosition = new Position(
+          //     selectedItem.lineStart,
+          //     selectedItem.columnStart
+          //   );
+          //   const newEndPosition = new Position(
+          //     selectedItem.lineEnd,
+          //     selectedItem.columnEnd
+          //   );
 
-            // Create a new selection with the specified position
-            const newSelection = new Selection(
-              newStartPosition,
-              newEndPosition
-            );
+          //   // Create a new selection with the specified position
+          //   const newSelection = new Selection(
+          //     newStartPosition,
+          //     newEndPosition
+          //   );
 
-            // Set the editor's selection to the new selection
-            editor.selection = newSelection;
+          //   // Set the editor's selection to the new selection
+          //   editor.selection = newSelection;
 
-            // Scroll to the new cursor position
-            editor.revealRange(
-              new Range(newStartPosition, newEndPosition),
-              TextEditorRevealType.InCenter
-            );
-            skipRevealNext++;
-          }
+          //   // Scroll to the new cursor position
+          //   editor.revealRange(
+          //     new Range(newStartPosition, newEndPosition),
+          //     TextEditorRevealType.InCenter
+          //   );
+          // }
         }
       }
     });

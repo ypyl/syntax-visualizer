@@ -31,12 +31,7 @@ namespace SyntaxVisualizer
                         .AddLanguageServer()
                         .SetMinimumLevel(LogLevel.Error))
                     // Register the SyntaxTreeHandler and TextDocumentHandler with the server
-                    .WithHandler(handler)
-                    .WithHandler(new TextDocumentHandler(handler)));
-
-            // Update actions in SyntaxTreeHandler to invalidate the tree when needed
-            handler.UpdateInvalidateTree(() => server.SendNotification("syntaxVisualizer/invalidTree"));
-            handler.UpdateInvalidateTree2(() => server.SendNotification("syntaxVisualizer/invalidTree2"));
+                    .WithHandler(handler));
 
             // Wait for the server to exit
             await server.WaitForExit;

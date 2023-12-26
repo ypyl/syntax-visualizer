@@ -80,6 +80,12 @@ export class SyntaxNodeProvider
     }
   }
 
+  // Method to refresh the tree
+  reset(): void {
+    this.fillTree = undefined;
+    this.refresh();
+  }
+
   // Get the tree item for a given element
   getTreeItem(element: SyntaxNodeTreeItem): vscode.TreeItem {
     return element;

@@ -38,16 +38,6 @@
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
-      },
-      {
-        "command": "calicoColors.addColor",
-        "category": "Calico Colors",
-        "title": "Add Color"
-      },
-      {
-        "command": "calicoColors.clearColors",
-        "category": "Calico Colors",
-        "title": "Clear Colors"
       }
     ],
     "viewsContainers": {

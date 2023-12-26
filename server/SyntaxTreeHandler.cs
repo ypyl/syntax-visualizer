@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,7 +14,7 @@ namespace SyntaxVisualizer
     /// </summary>
     public class STreeParams : IRequest<SNode>
     {
-        public string id;
+        public string text;
     }
 
     /// <summary>
@@ -51,28 +50,6 @@ namespace SyntaxVisualizer
     {
         // SyntaxWalker for traversing the syntax tree.
         private readonly SyntaxWalker walker = new();
-        // Action to invalidate the syntax tree.
-        public Action invalidateTree = () => { };
-        // Another action to invalidate the syntax tree.
-        public Action invalidateTree2 = () => { };
-
-        /// <summary>
-        /// Updates the action to invalidate the syntax tree.
-        /// </summary>
-        /// <param name="action"></param>
-        public void UpdateInvalidateTree(Action action)
-        {
-            invalidateTree = action;
-        }
-
-        /// <summary>
-        /// Updates another action to invalidate the syntax tree.
-        /// </summary>
-        /// <param name="action"></param>
-        public void UpdateInvalidateTree2(Action action)
-        {
-            invalidateTree2 = action;
-        }
 
         /// <summary>
         /// SyntaxWalker for traversing the syntax tree and building the SNode structure.
@@ -170,10 +147,6 @@ namespace SyntaxVisualizer
         public void UpdateCurrentCode(string code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
-            if (walker.SNode is not null)
-            {
-                invalidateTree();
-            }
             walker.Reset();
             walker.Visit(tree.GetRoot());
         }
@@ -186,14 +159,11 @@ namespace SyntaxVisualizer
         /// <returns></returns>
         public Task<SNode> Handle(STreeParams request, CancellationToken cancellationToken)
         {
-            if (request?.id is null)
+            if (request?.text is not null)
             {
-                return Task.FromResult(walker.SNode);
+                UpdateCurrentCode(request.text);
             }
-            else
-            {
-                return Task.FromResult(FindSubTree(request.id, walker.SNode));
-            }
+            return Task.FromResult(request?.text is null ? null : walker.SNode);
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace SyntaxVisualizer
     /// <summary>
     /// Handles text document synchronization for C# files.
     /// </summary>
-    internal class TextDocumentHandler : ITextDocumentSyncHandler
+    internal class CSharpTextDocumentHandler : ITextDocumentSyncHandler
     {
         // Defines a document selector for C# files.
         private readonly DocumentSelector _documentSelector = new(
@@ -31,7 +31,7 @@ namespace SyntaxVisualizer
         /// Constructor that takes a SyntaxTreeHandler as a parameter.
         /// </summary>
         /// <param name="handler"></param>
-        public TextDocumentHandler(SyntaxTreeHandler handler) => _handler = handler;
+        public CSharpTextDocumentHandler(SyntaxTreeHandler handler) => _handler = handler;
 
         /// <summary>
         /// Handles the event when a text document has changed.
@@ -41,8 +41,6 @@ namespace SyntaxVisualizer
         /// <returns></returns>
         public Task<Unit> Handle(DidChangeTextDocumentParams notification, CancellationToken token)
         {
-            // Invalidate the syntax tree when the text document changes.
-            _handler.invalidateTree2();
             return Unit.Task;
         }
 
